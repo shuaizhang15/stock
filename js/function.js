@@ -4,7 +4,7 @@ function getStock(){
         url: 'GetStock.py',
         crossDomain: true,
         success: function(data){
-
+            console.log(data);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
             alert('股票数据返回错误，找张帅问问');
