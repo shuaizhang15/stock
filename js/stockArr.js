@@ -1,25 +1,29 @@
+// the amount of zhangting stock
 upCount = 0;
+
+// the amount of dieting stock
 downCount = 0;
+
+// API url from Baidu / 126 money
 stockUrl = "";
+
+// the length of the sub-arraies within all the stock code
 stockArrayLength = 0;
+
+// the counts of the sub-arraies which has been processed
 stockArrayCount = 0;
 
-/* 
- * 涨停股列表
- * buy1StockTotal[i][0]股票代码
- * buy1StockTotal[i][1]买一库存量
- * 跌停股列表
- * sell1StockTotal[i][0]股票代码
- * sell1StockTotal[i][1]卖一库存量
- */
+// buy1 data | buy1StockTotal[i][0] = stock_code | buy1StockTotal[i][1] = buy1_val
 buy1StockTotal = new Array();
+
+// sell1 data | sell1StockTotal[i][0] = stock_code | sell1StockTotal[i][1] = sell1_val
 sell1StockTotal = new Array();
 
 // stock 163 url
 stock163Url = "http://quotes.money.163.com/";
 
-// 沪深股列表
+// the main array of all the stock code which has been collected
 allArr = new Array();
 
-// 沪深股列表列表 - 每个列表的长度小于800
+// the array collecting all the sub-array of the stock code - length <= 800
 allStockCodeArray = new Array();

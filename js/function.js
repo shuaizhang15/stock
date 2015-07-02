@@ -1,7 +1,18 @@
-function makeStockArray(){
+// send request to the server & get stock code array back
+function getStock(){
+    $.ajax({
+        url: 'GetStock.py',
+        crossDomain: true,
+        success: function(data){
 
-    
-    
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown){
+            alert('股票数据返回错误，找张帅问问');
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
 }
 
 
@@ -65,7 +76,7 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
             $("#limit_up_count").text(upCount);
             $("#limit_down_count").text(downCount);
             stockArrayCount++;
-            alert(stockArrayLength);
+            console.log("stockArraylengt: " + stockArrayLength);
             if(stockArrayCount == 4) {
                 tableMake(buy1StockTotal, sell1StockTotal);
             }
