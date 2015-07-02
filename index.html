@@ -8,7 +8,7 @@
       <title>买一收集</title>
       <script src="js/jquery-1.11.1.min.js" type="text/javascript"></script>
       <script src="js/stockArr.js" type="text/javascript"></script>
-      <script src="js/hqTable.js" type="text/javascript"></script>
+      <script src="js/function.js" type="text/javascript"></script>
       <script src="js/sortTable.js" type="text/javascript"></script>
       <script>
           $(document).ready(function() {
@@ -17,6 +17,7 @@
               $('#date').html(nowTime + " " + getWeekDay());
               // 股票数据
               cutArray(allArr);
+              stockArrayLength = allStockCodeArray.length;
               for(index in allStockCodeArray) {
                   stockUrl = urlMake(allStockCodeArray[index]);
                   getStockData(stockUrl, buy1StockTotal, sell1StockTotal);

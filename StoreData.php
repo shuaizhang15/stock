@@ -4,7 +4,7 @@ header("Content-Type:text/html;charset=utf-8");
 // Store the stock-buy1 data.
 if(!empty($_POST['from_index']) && $_POST['from_index'] == "true") {
     // Initiallize folders and check their status.
-    $file_folder = '../data';
+    $file_folder = '../stock_data';
     if(!file_exists($file_folder)) {
         $error = "出错，文件夹不存在<br />
                   找张帅或管理员看一下";
@@ -16,7 +16,7 @@ if(!empty($_POST['from_index']) && $_POST['from_index'] == "true") {
     $content = $_POST['date'];
     $content .= "\r\n今日涨停" . count($_POST['buy1_stock_data']) . "支股票";
     $content .= "\t\t今日跌停" . count($_POST['sell1_stock_data']) . "支股票";
-    $content .= "\r\n涨停股票 - 买一库存\t\t跌停股票 - 卖一库存";
+    $content .= "\r\n涨停股 - 买一库存\t\t跌停股 - 卖一库存";
     
     $buy1_pair_array = array();
     $sell1_pair_array = array();
@@ -31,11 +31,11 @@ if(!empty($_POST['from_index']) && $_POST['from_index'] == "true") {
 
     for($i=0; $i<$long_length; $i++) {
         $content .= "\r\n";
-        if($buy1_pair_array[$i][0] != "-1" || $buy1_pair_array[$i][0] != "") {
+        if(!empty($buy1_pair_array[$i][0]) && $buy1_pair_array[$i][0] != "" && $buy1_pair_array[$i][0] != "-1") {
             $content .= $buy1_pair_array[$i][0] . " - " . $buy1_pair_array[$i][1];
         }
         $content .= "\t\t\t";
-        if($sell1_pair_array[$i][0] != "-1" || $sell1_pair_array[$i][0] != "") {
+        if(!empty($sell1_pair_array[$i][0]) && $sell1_pair_array[$i][0] != "" && $sell1_pair_array[$i][0] != "-1") {
             $content .= $sell1_pair_array[$i][0] . " - " . $sell1_pair_array[$i][1];
         }
     }    

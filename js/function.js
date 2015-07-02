@@ -1,5 +1,12 @@
+function makeStockArray(){
+
+    
+    
+}
+
+
 // 切割过长数组
-function cutArray(arr){
+function cutArray(arr) {
     if(arr.length > 800) {
         allStockCodeArray.push(arr.splice(0, 800));
         cutArray(arr);
@@ -58,6 +65,7 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
             $("#limit_up_count").text(upCount);
             $("#limit_down_count").text(downCount);
             stockArrayCount++;
+            alert(stockArrayLength);
             if(stockArrayCount == 4) {
                 tableMake(buy1StockTotal, sell1StockTotal);
             }
