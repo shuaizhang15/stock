@@ -12,7 +12,14 @@
       <script src="js/sortTable.js" type="text/javascript"></script>
       <script>
           $(document).ready(function() {
-              getStock();
+              
+              // width=10;
+              // w= Math.round(Math.random()*width);
+              getStockList();
+              $('#canvas').click(function(){
+                  pickADate();
+              });
+              
               // // 当天日期
               // var nowTime = (new Date()).Format("yyyy-MM-dd");
               // $('#date').html(nowTime + " " + getWeekDay());
@@ -30,18 +37,24 @@
     <body>
         <div id="container">
             <div id="header">
-                <h1 id="date" style="display: inline; font-size: 50px;"></h1>
-                <h1 style="display: inline; color: red; font-size: 50px;"> 涨停<span id="limit_up_count">0</span></h1>
-                <h1 style="display: inline;"> </h1> 
-                <h1 style="display: inline; color: green; font-size: 50px;">跌停<span id="limit_down_count">0</span></h1>
+                <div id="header_right">
+                    <h1 class="title_text" style="color: red;">涨停<span id="limit_up_count">0</span></h1>
+                    <h1 class="title_text" style="color: green;">跌停<span id="limit_down_count">0</span></h1>
+                </div>
+                <div id="header_left">
+                    <h1 class="title_text" id="date"></h1>
+                    <div class="canvas_box">
+                        <canvas id="canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
             </div>
             <div id="main">
                 <div id="main_table" class="container-fluid">
                     <div class="row stockTitle">
-                        <div class="col-md-3" style='text-align: right; font-size: 40px;'><h1>涨停股票代号</h1></div>
-                        <div class="col-md-3" style='text-align: left; font-size: 40px;'><h1>买一库存量</h1></div>
-                        <div class="col-md-3" style='text-align: right; font-size: 40px;'><h1>跌停股票代号</h1></div>
-                        <div class="col-md-#" style='text-align: left; font-size: 40px;'><h1>卖一库存量</h1></div>
+                        <div class="col-md-3" style='text-align: right; font-size: 40px;'><span>涨停股票代号</span></div>
+                        <div class="col-md-3" style='text-align: left; font-size: 40px;'><span>买一库存量</span></div>
+                        <div class="col-md-3" style='text-align: right; font-size: 40px;'><span>跌停股票代号</span></div>
+                        <div class="col-md-3" style='text-align: left; font-size: 40px;'><span>卖一库存量</span></div>
                     </div>
                 </div>
             </div>

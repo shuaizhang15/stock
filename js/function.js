@@ -1,10 +1,34 @@
-// send request to the server & get stock code array back
-function getStock(){
+function pickADate() {
+    alert('此为本数据对应更新时间。');
+}
+
+// send request to the server & get stock code list back
+// sub-list's length = 800
+function getStockList() {
+    var url = "http://api.money.126.net/data/feed/";
+    var stock_code_string = "";
     $.ajax({
-        url: 'GetStock.py',
+        type: "POST",
+        url: "GetStoreCodeArray.php",
+        data: {request_stock_code_array: "1"},
         crossDomain: true,
-        success: function(data){
-            console.log(data);
+        success: function(data_json_str) {
+            var data_json_obj = eval("[" + data_json_str + "]");
+            $(data_json_obj[0].sh).each(function(index, value) {
+                stock_code_string += "0" + value + ",";
+                if((index+1) % 800 == 0 || (index+1) == data_json_obj[0].sh.length) {
+                    stock_url_list.push(url + stock_code_string + "money.api");
+                    stock_code_string = "";
+                }
+            });
+            $(data_json_obj[0].sz).each(function(index, value) {
+                stock_code_string += "1" + value + ",";
+                if((index+1) % 800 == 0 || (index+1) == data_json_obj[0].sz.length) {
+                    stock_url_list.push(url + stock_code_string + "money.api");
+                    stock_code_string = "";
+                }
+            });
+            requestStock();
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
             alert('股票数据返回错误，找张帅问问');
@@ -15,26 +39,12 @@ function getStock(){
     });
 }
 
-
-// 切割过长数组
-function cutArray(arr) {
-    if(arr.length > 800) {
-        allStockCodeArray.push(arr.splice(0, 800));
-        cutArray(arr);
-    } else {
-        allStockCodeArray.push(arr);
-    }
-}
-
-//根据股票行情数组来创建126股票数据接口的url请求
-function urlMake(arr) {
-    var url = "http://api.money.126.net/data/feed/";
-    for(var i=0; i<arr.length; i++) {
-        url = url + arr[i] + ",";
-    }
-    url += "money.api";
-    console.log(url);
-    return url;
+// 分别发起请求
+function requestStock(){
+    $.each(stock_url_list, function(index, value){
+        getStockData(value, buy1StockTotal, sell1StockTotal);
+        console.log(value);
+    });
 }
 
 // 获取涨停股的数据
@@ -47,6 +57,7 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
         success: function(data){
             for(index in data){
                 thisBuy1StockData = new Array();
+                thisSell1StockData = new Array();
                 // 买一库存
                 if(data[index].askvol1 == 0 && data[index].bidvol1 != 0) {
                     thisBuy1StockData.push(data[index].code);
@@ -59,7 +70,6 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
                     buy1StockTotal.push(thisBuy1StockData);
                     upCount++;
                 }
-                thisSell1StockData = new Array();
                 // 卖一库存
                 if(data[index].bidvol1 == 0 && data[index].askvol1 != 0) {
                     thisSell1StockData.push(data[index].code);
@@ -75,9 +85,24 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
             }
             $("#limit_up_count").text(upCount);
             $("#limit_down_count").text(downCount);
+            if(!isDateInit){
+                for(i in data){
+                    isDateInit = true;
+                    var initDate = data[i].time;
+                    var readableDateTime = initDate.replace('/', '年').replace('/', '月').replace(' ', '日 ').replace(':', '时').replace(':', '分')+"秒";
+                    var readableTimeArr = {
+                        "hh":initDate.substr(11, 2),
+                        "mm":initDate.substr(14, 2),
+                        "ss":initDate.substr(17, 2)
+                    };
+                    $("#date").text(readableDateTime);
+                    drawClock(readableTimeArr);
+                    break;
+                }
+            }
             stockArrayCount++;
-            console.log("stockArraylengt: " + stockArrayLength);
-            if(stockArrayCount == 4) {
+            console.log("stockArraylengt: " + stock_url_list.length);
+            if(stockArrayCount == stock_url_list.length) {
                 tableMake(buy1StockTotal, sell1StockTotal);
             }
         },
@@ -108,35 +133,49 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
 
 //更新表格中的行情数据
 function tableMake(buy1StockTotal, sell1StockTotal) { 
-    var trNodes, trNode, buy1Id, buy1Vol, sell1Id, sell1Vol;
-    var main_table = $('#main_table');
-    trNodes = "";
+    var tr_node, buy1_code, buy1_value, sell1_code, sell1_value;
+    var tr_nodes = "";
+    var input_data = "";
     if((buy1StockTotal != null && buy1StockTotal.length)
             || (sell1StockTotal != null && sell1StockTotal.length))
     {
         long_length = (buy1StockTotal.length>sell1StockTotal.length) ? buy1StockTotal.length : sell1StockTotal.length;
         for(var i=0; i<long_length; i++) {
-            buy1Id = (buy1StockTotal[i] != null) ? buy1StockTotal[i][0] : "-1";
-            buy1Vol = (buy1StockTotal[i] != null) ? buy1StockTotal[i][1] : "-1";
-            sell1Id = (sell1StockTotal[i] != null) ? sell1StockTotal[i][0] : "-1";
-            sell1Vol = (sell1StockTotal[i] != null) ? sell1StockTotal[i][1] : "-1";
-            // 页面展示
-            buy1_html_id = (buy1Id != "-1")
-                    ? "<div class='col-md-3' style='text-align: right'><a href='" + stock163Url + buy1Id + ".html'>" + buy1Id.substr(1) + "</a></div>"
-                    : "<div class='col-md-3' style='text-align: right'>" + buy1Id + "</div>";
-            buy1_html_vol = "<div class='col-md-3' style='text-align: left; color: red;'>" + buy1Vol + "</div>";
-            sell1_html_id = (sell1Id != "-1")
-                    ? "<div class='col-md-3' style='text-align: right'><a href='" + stock163Url + sell1Id + ".html'>" + sell1Id.substr(1) + "</a></div>"
-                    : "<div class='col-md-3' style='text-align: right'>" + sell1Id + "</div>";
-            sell1_html_vol = "<div class='col-md-3' style='text-align: left; color: green;'>" + sell1Vol + "</div>";
-            trNode = "<div class='row stockData'>" + buy1_html_id + buy1_html_vol + sell1_html_id + sell1_html_vol + "</div>";
-            trNodes += trNode;
-            // 表格添加数据
-            input_stock_pair = "<input name='buy1_stock_data[" + ((buy1Id != "-1") ? buy1Id.substr(1) : buy1Id) + "]' value='" + buy1Vol + "'/>";
-            input_stock_pair += "<input name='sell1_stock_data[" + ((sell1Id != "-1") ? sell1Id.substr(1) : sell1Id) + "]' value='" + sell1Vol + "'/>";
-            $('#hidden_form form').append(input_stock_pair);
+
+            // Collect stock-id, stock-val for buying & selling stocks.
+            if(buy1StockTotal[i] != null) {
+                buy1_code = buy1StockTotal[i][0];
+                buy1_value = buy1StockTotal[i][1];
+                buy1_html_id = "<div class='col-md-3 stock-code'><a target='_blank' href='" + stock163Url + buy1_code + ".html'>" + buy1_code.substr(1) + "</a></div>";
+                buy1_html_vol = "<div class='col-md-3 stock-value stock-buy'>" + buy1_value + "</div>";
+                input_data += "<input name='buy1_stock_data[" + buy1_code.substr(1) + "]' value='" + buy1_value + "'/>";
+            } else {
+                buy1_code = "-1";
+                buy1_value = "-1";
+                buy1_html_id = "<div class='col-md-3 stock-code'>-1</div>";
+                buy1_html_vol = "<div class='col-md-3 stock-value'>-1</div>";
+                // input_data += "<input name='buy1_stock_data[" + buy1_code.substr(1) + "]' value='" + buy1_value + "'/>";
+            }
+            if(sell1StockTotal[i] != null) {
+                sell1_code = sell1StockTotal[i][0];
+                sell1_value = sell1StockTotal[i][1];
+                sell1_html_id = "<div class='col-md-3 stock-code'><a target='_blank' href='" + stock163Url + sell1_code + ".html'>" + sell1_code.substr(1) + "</a></div>";
+                sell1_html_vol = "<div class='col-md-3 stock-value stock-sell'>" + sell1_value + "</div>";
+                input_data += "<input name='sell1_stock_data[" + sell1_code.substr(1) + "]' value='" + sell1_value + "'/>";
+            } else {
+                sell1_code = "-1";
+                sell1_value = "-1";
+                sell1_html_id = "<div class='col-md-3 stock-code'>-1</div>";
+                sell1_html_vol = "<div class='col-md-3 stock-value'>-1</div>";
+                // input_data += "<input name='sell1_stock_data[" + sell1_code.substr(1) + "]' value='" + sell1_value + "'/>";
+            }
+
+            // Add into a new tr node.
+            tr_node = "<div class='row stockData'>" + buy1_html_id + buy1_html_vol + sell1_html_id + sell1_html_vol + "</div>";
+            tr_nodes += tr_node;
         }
-        main_table.append(trNodes);
+        $('#main_table').append(tr_nodes);
+        $('#hidden_form form').append(input_data);
     } else {
         $("#hidden_notice").appendTo("#main_table");
         $(".hidden_data").empty();
@@ -203,3 +242,223 @@ http://img1.quotes.ws.126.net/chart/kchart/180/1000001.png   半年线
 
 */
 
+function drawClock(readableTimeArr) {
+
+    hh = parseInt(readableTimeArr.hh.length ? readableTimeArr.hh : "0");
+    mm = parseInt(readableTimeArr.mm.length ? readableTimeArr.mm : "0");
+    ss = parseInt(readableTimeArr.ss.length ? readableTimeArr.ss : "0");
+    var hours = (hh % 12) * 2 * Math.PI/12;
+    var m = mm * 2 * Math.PI/60;
+    var s = ss * Math.PI/60;
+
+    // Ready to go.
+    var deg = 2*Math.PI/12; 
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext("2d");
+
+    ctx.save();
+    ctx.fillStyle="#F1F1F1";
+    ctx.fillRect(0,0,400,400);
+    ctx.beginPath();
+    ctx.moveTo(10,10);
+    ctx.lineTo(400,10);
+    ctx.lineTo(400,200);
+    ctx.lineTo(10,200);
+    ctx.closePath();
+    var x=20;
+    var y=20;
+    var w=360;
+    var h=360;
+    var r=100;
+    
+    //圆角矩形
+    ctx.save();
+    ctx.shadowBlur=5;
+    ctx.shadowColor="#656565";
+    ctx.shadowOffsetX=0;
+    ctx.shadowOffsetY=4;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    var f_jb = ctx.createRadialGradient(200,200,0,200,200,200);
+    f_jb.addColorStop("0.5","#ffffff");
+    f_jb.addColorStop("1","#ededed");
+    ctx.strokeStyle="#f8f8f8";
+    ctx.closePath();
+    ctx.fillStyle=f_jb;
+    ctx.stroke();
+    ctx.fill();
+    ctx.restore();
+    
+    //内阴影
+    ctx.shadowBlur=8;
+    ctx.shadowColor="#414141";
+    ctx.shadowOffsetX=0;
+    ctx.shadowOffsetY=-6;
+    ctx.beginPath();
+    ctx.moveTo(w+x,h-r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.lineWidth=1;
+    var x_jb=ctx.createLinearGradient(0,300,0,360);
+    x_jb.addColorStop("0","#c3b3b3");
+    x_jb.addColorStop("1","#f2f2f2");
+    ctx.strokeStyle=x_jb;
+    ctx.lineCap="round";
+    ctx.stroke();
+    
+    //内圆
+    ctx.shadowBlur=10;
+    ctx.shadowColor="#8f8f8f";
+    ctx.shadowOffsetX=0;
+    ctx.shadowOffsetY=0;
+    ctx.strokeStyle="#ffffff";
+    var yjb=ctx.createLinearGradient(0,0,0,150);
+    yjb.addColorStop("0","#636363");
+    yjb.addColorStop("1.0","#414141");
+    ctx.beginPath();
+    ctx.arc(200,200,150,0,2*Math.PI);
+    ctx.stroke();
+    ctx.fillStyle=yjb;
+    ctx.fill();
+    ctx.closePath();
+    
+    //圆内阴影
+    ctx.globalAlpha=0.1;
+    var yjb=ctx.createRadialGradient(200,200,0,200,200,200);
+    yjb.addColorStop("0","#ffffff");
+    yjb.addColorStop("1.0","#000000");
+    ctx.beginPath();
+    ctx.arc(200,200,150,0,2*Math.PI);
+    ctx.stroke();
+    ctx.fillStyle=yjb;
+    ctx.fill();
+    ctx.closePath();
+    ctx.globalAlpha=1;
+    
+    //数字
+    ctx.translate(200,200);
+    ctx.beginPath();
+    for(var i=1;i<13;i++) {
+        var x1=Math.sin(i*deg);
+        var y1=-Math.cos(i*deg);
+        ctx.fillStyle="#fff";
+        ctx.font="bold 20px Arial";
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.fillText(i,x1*130,y1*130);    
+    }
+    ctx.restore();
+    
+    //转针开始
+    ctx.strokeStyle="#f8f8f8";
+
+    //时针
+    x=-10;
+    y=-70;
+    w=20;
+    h=80;
+    r=10;
+    //h + m/12 + s/720
+    ctx.translate(200,200);
+    ctx.save();
+    ctx.rotate(hours + m/12 + s/720);
+    ctx.shadowBlur=5;
+    ctx.shadowColor="#313131";
+    ctx.shadowOffsetX=2;
+    ctx.shadowOffsetY=2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillStyle="#ffffff";
+    ctx.fill();
+    ctx.restore(); 
+    
+    //分针
+    x=-10;
+    y=-100;
+    w=20;
+    h=100;
+    r=10;
+    //ctx.translate(200,200);m+s/60
+    ctx.save();
+    ctx.rotate(m+s/60);
+    ctx.shadowBlur=5;
+    ctx.shadowColor="#313131";
+    ctx.shadowOffsetX=2;
+    ctx.shadowOffsetY=2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillStyle="#ffffff";
+    ctx.fill();
+    ctx.restore();
+    
+    //针上小圆
+    ctx.save();
+    ctx.shadowBlur=5;
+    ctx.shadowColor="#313131";
+    ctx.shadowOffsetX=0;
+    ctx.shadowOffsetY=0;
+    ctx.beginPath();
+    ctx.arc(0,0,15,0,2*Math.PI);
+    ctx.stroke();
+    ctx.fillStyle="#fff";
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
+
+    //秒针
+    x=-30;
+    y=-2;
+    w=140;
+    h=4;
+    r=1;
+    ctx.save();
+    ctx.rotate(s);
+    ctx.shadowBlur=5;
+    ctx.shadowColor="#313131";
+    ctx.shadowOffsetX=2;
+    ctx.shadowOffsetY=2;
+    ctx.beginPath();
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillStyle="#c15b4f";
+    ctx.fill();
+    ctx.restore();
+    
+    //小红圆
+    ctx.save();
+    ctx.shadowBlur=3;
+    ctx.shadowColor="#313131";
+    ctx.shadowOffsetX=2;
+    ctx.shadowOffsetY=2;
+    ctx.beginPath();
+    ctx.arc(0,0,7,0,2*Math.PI);
+    ctx.stroke();
+    ctx.fillStyle="#c15b4f";
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
+
+    ctx.restore();
+    
+    // setTimeout(drawClock,1000);
+}

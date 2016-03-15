@@ -9,14 +9,30 @@ div#container {
 }
 
 div#header {
-  height:60px;
   background-color:#F1F1F1;
   color:#0066CC;
   border-style:none;
-  text-align:center;
+  /*text-align:center;*/
   /*text-indent:10px;*/
   margin-bottom:10px;
   padding-top: 10px;
+  height: 530px;
+}
+
+#header_right{
+    display: inline-block;
+    margin-top: 150px;
+}
+#header_left{
+    display: inline-block;
+    width: 65%;
+    float: left;
+    /*padding-left: 20%;*/
+    text-align:center;
+}
+
+#date{
+    font-size: 30px;
 }
 
 div#main {
@@ -30,27 +46,6 @@ div#main {
 div#footer {
   text-align:center;
   background-color:#F1F1F1;
-}
-
-.hqtabledisplay {
-  display:none;
-}
-
-.lsgzdisplay {
-  display:none;
-}
-
-.morestock > button {
-  width:100%;
-  cursor:pointer;
-  color:#0066CC;
-  background-color:#F1F1F1;
-  padding:5px;
-}
-
-input {
-  font-size:20px;
-  color:#0000FF;
 }
 
 body {
@@ -69,11 +64,10 @@ p {
   _height:760px; /*（解决ie6） ie6超出自动溢出 */
 }
 
-h1 {
-  font-size:45px;
-  padding-top: 10px;
+.title_text{
+    font-size: 50px;
+    padding-top: 10px;
 }
-
 h2 {
   margin-bottom:0;
   font-size:35px;
@@ -82,11 +76,6 @@ h2 {
 h3 {
   margin-bottom:0;
   font-size:25px;
-}
-  
-ol {
-  padding-left:30px;
-  padding-right:30px;
 }
 
 a:link {
@@ -106,55 +95,17 @@ a:hover {
   text-decoration:underline;
 }
 
-table,td,th {
-  border:1px solid #C9C9C9;
-}
-
-table {
-  border-collapse:collapse;
-  width:100%;
-}
-
-th {
-  background-color:#CDE5FC;
-  cursor:pointer;
-  padding:5px;
-}
-
-.yellow {
-  background-color:#FCFC77;
-}
-
-td {
-  padding:5px;
-}
-
-caption {
-  padding:2px;
-  font-weight:bold;
-  text-align:left;
-  background-color:#F1F1F1;
-}
-
-#stockTable {
-  text-align:right;
-}
-
-#historyTable {
-  text-align:right;
-}
-
 #indexHead {
   text-align:center;
 }
 
 .stockTitle div h4 {
-  font-weight: bold;
-  font-size: 50px;
+    font-weight: bold;
+    font-size: 50px;
 }
 
 .stockData{
-  font-size: 50px;
+    font-size: 50px;
 }
 
 .stockData:nth-of-type(even){
@@ -166,7 +117,6 @@ caption {
     padding-bottom: 10px;
     border: 1px solid #ddd;
     border: 1px solid rgba(86, 61, 124, .2);
-    text-align: center;	
     font-weight: bold;
 }
 
@@ -175,4 +125,21 @@ caption {
 }
 #limit_down_count {
     color: green;
+}
+
+.stock-code {
+    text-align: right;
+}
+.stock-value {
+    text-align: left;
+}
+.stock-buy {
+    color: red;
+}
+.stock-sell {
+    color: green;
+}
+
+#canvas{
+    cursor: pointer;
 }

@@ -1,16 +1,19 @@
-// the amount of zhangting stock
-upCount = 0;
+// this list collects the request-url for all the stock
+stock_url_list = new Array();
 
-// the amount of dieting stock
+// the amount of zhangting stock and the amount of dieting stock
+upCount = 0;
 downCount = 0;
+
+// the state of initillization of date value.
+isDateInit = false;
+initDate = "";
 
 // API url from Baidu / 126 money
 stockUrl = "";
 
-// the length of the sub-arraies within all the stock code
+// the length of the sub-arraies within all the stock code and which have been processed
 stockArrayLength = 0;
-
-// the counts of the sub-arraies which has been processed
 stockArrayCount = 0;
 
 // buy1 data | buy1StockTotal[i][0] = stock_code | buy1StockTotal[i][1] = buy1_val
@@ -24,6 +27,3 @@ stock163Url = "http://quotes.money.163.com/";
 
 // the main array of all the stock code which has been collected
 allArr = new Array();
-
-// the array collecting all the sub-array of the stock code - length <= 800
-allStockCodeArray = new Array();
