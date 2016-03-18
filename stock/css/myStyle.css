@@ -21,13 +21,15 @@ div#header {
 
 #header_right{
     display: inline-block;
-    margin-top: 150px;
+    margin-top: 125px;
+    margin-left: 12%;
+    width: 30%;
 }
 #header_left{
     display: inline-block;
-    width: 65%;
+    width: 45%;
     float: left;
-    /*padding-left: 20%;*/
+    padding-left: 14%;
     text-align:center;
 }
 

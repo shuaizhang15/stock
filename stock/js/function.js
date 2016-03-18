@@ -1,5 +1,39 @@
+// bind adding stock event
+function bindAddingEvent() {
+    var code_class = {
+        "000" : "alert-success",
+        "100" : "alert-warning",
+        "101" : "alert-warning",
+        "400" : "alert-danger",
+        "401" : "alert-danger",
+        "402" : "alert-danger",
+        "403" : "alert-danger",
+        };
+    $('#addNewStock').bind('click', function(){
+        var new_stock_code = $('#newStockCode').val();
+        $.ajax({
+            type: "POST",
+            url: "php/AddNewStock.php",
+            data: {add_new_stock: new_stock_code},
+            crossDomain: true,
+            success: function(result_json) {
+                var result = eval("[" + result_json + "]");
+                $('#addNotice').hide().empty().removeAttr('class').addClass('alert').addClass(code_class[result[0]["code"]]).append(result[0]["text"]).show('slow');
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+                alert('添加股票返回错误，找张帅问问');
+                console.log(XMLHttpRequest.status);
+                console.log(XMLHttpRequest.readyState);
+                console.log(textStatus);
+                $('#addNotice').hide().empty().append("添加失败，请尝试手动添加。").show('slow');
+            }
+        });
+    });
+}
+
+// click or not
 function pickADate() {
-    alert('此为本数据对应更新时间。');
+    alert('大盘最后更新时间。如遇异常有可能碰到夏令时或冬令时，请根据情况自行加减一小时。');
 }
 
 // send request to the server & get stock code list back
@@ -9,7 +43,7 @@ function getStockList() {
     var stock_code_string = "";
     $.ajax({
         type: "POST",
-        url: "GetStoreCodeArray.php",
+        url: "php/GetStoreCodeArray.php",
         data: {request_stock_code_array: "1"},
         crossDomain: true,
         success: function(data_json_str) {
@@ -28,7 +62,10 @@ function getStockList() {
                     stock_code_string = "";
                 }
             });
-            requestStock();
+            $.each(stock_url_list, function(index, value){
+                getStockData(value, buy1StockTotal, sell1StockTotal);
+                // console.log(value);
+            });
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
             alert('股票数据返回错误，找张帅问问');
@@ -39,15 +76,15 @@ function getStockList() {
     });
 }
 
-// 分别发起请求
-function requestStock(){
-    $.each(stock_url_list, function(index, value){
-        getStockData(value, buy1StockTotal, sell1StockTotal);
-        console.log(value);
-    });
-}
+// // request stock data
+// function requestStock(){
+//     $.each(stock_url_list, function(index, value){
+//         getStockData(value, buy1StockTotal, sell1StockTotal);
+//         // console.log(value);
+//     });
+// }
 
-// 获取涨停股的数据
+// 获取涨停股及跌停股的数据
 function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
     $.ajax({
         url: stockUrl,
@@ -86,10 +123,11 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
             $("#limit_up_count").text(upCount);
             $("#limit_down_count").text(downCount);
             if(!isDateInit){
+                isDateInit = true;
                 for(i in data){
-                    isDateInit = true;
                     var initDate = data[i].time;
-                    var readableDateTime = initDate.replace('/', '年').replace('/', '月').replace(' ', '日 ').replace(':', '时').replace(':', '分')+"秒";
+                    // console.log(data[i]);
+                    var readableDateTime = initDate.replace('/', '年').replace('/', '月').replace(' ', '日 ');
                     var readableTimeArr = {
                         "hh":initDate.substr(11, 2),
                         "mm":initDate.substr(14, 2),
@@ -101,7 +139,8 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
                 }
             }
             stockArrayCount++;
-            console.log("stockArraylengt: " + stock_url_list.length);
+            // console.log("stockArraylength: " + stock_url_list.length);
+            // console.log("stockUrlList:" + stock_url_list);
             if(stockArrayCount == stock_url_list.length) {
                 tableMake(buy1StockTotal, sell1StockTotal);
             }
@@ -114,22 +153,6 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
         }
     });
 }
-
-// function processStockArray(buy1StockData, sell1StockData) {
-//     buy1StockTotal = new Array();
-//     sell1StockTotal = new Array();
-//     if(buy1StockData != null && buy1StockData.length) {
-//         for(var i=0; i<buy1StockData.length; i++) {
-//             buy1StockTotal.push(buy1StockData[i]);
-//         }
-//     }
-//     if (sell1StockData != null && sell1StockData.length) {
-//         for(var i=0; i<sell1StockData.length; i++) {
-//             sell1StockTotal.push(sell1StockData[i]);
-//         }
-//     }
-//     tableMake(buy1StockTotal, sell1StockTotal);
-// }
 
 //更新表格中的行情数据
 function tableMake(buy1StockTotal, sell1StockTotal) { 
@@ -194,7 +217,7 @@ function tableMake(buy1StockTotal, sell1StockTotal) {
 // 存储文件
 function historyMake() {
     $('#form_date').val($('#date').text());
-    $.post("StoreData.php", $('#hidden_form form').serialize(), function(result){
+    $.post("php/StoreData.php", $('#hidden_form form').serialize(), function(result){
         console.log(result);
     });
 }
@@ -203,7 +226,7 @@ function historyMake() {
 // 对Date的扩展，将 Date 转化为指定格式的String 
 // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符， 
 // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字) 
-// 例子： 
+// 例子：
 // (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423 
 // (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18 
 Date.prototype.Format = function(fmt) 
@@ -242,6 +265,7 @@ http://img1.quotes.ws.126.net/chart/kchart/180/1000001.png   半年线
 
 */
 
+// Draw a clock
 function drawClock(readableTimeArr) {
 
     hh = parseInt(readableTimeArr.hh.length ? readableTimeArr.hh : "0");
