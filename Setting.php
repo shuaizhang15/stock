@@ -1,7 +1,7 @@
 <?php
 // by Shuai Zhang
 
-$environment = "mac";   // mac or win
+$environment = "win";   // mac or win
 $list_folder = "../stock_list/";
 $data_folder = "../../stock_data";
 

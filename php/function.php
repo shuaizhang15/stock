@@ -1,4 +1,5 @@
 <?php
+header("Content-Type:text/html;charset=utf-8");
 
 // Adding new stock to the stock list
 function addNewStock($new_stock_code, $setting) {
@@ -112,7 +113,7 @@ function storeStock($post, $setting) {
 
     file_put_contents($file_path, $content);
 
-    // $data_file = fopen($file_path, "w");
+    // $data_file = fopen($file_path, "a");
     // fwrite($data_file, $content);
     // fclose($data_file);
 

@@ -127,7 +127,7 @@ function getStockData(stockUrl, buy1StockTotal, sell1StockTotal){
                 for(i in data){
                     var initDate = data[i].time;
                     // console.log(data[i]);
-                    var readableDateTime = initDate.replace('/', '年').replace('/', '月').replace(' ', '日 ');
+                    var readableDateTime = initDate.replace('/', '-').replace('/', '-');//.replace(' ', '日 ');
                     var readableTimeArr = {
                         "hh":initDate.substr(11, 2),
                         "mm":initDate.substr(14, 2),
@@ -216,7 +216,16 @@ function tableMake(buy1StockTotal, sell1StockTotal) {
 
 // 存储文件
 function historyMake() {
-    $('#form_date').val($('#date').text());
+    var stock_date = $('#date').text();
+    var this_date = new Date();
+    this_date.setFullYear(
+        stock_date.substr(0, 4),
+        parseInt(stock_date.substr(5, 2)) - 1,
+        stock_date.substr(8, 2)
+    );
+    date_file_name = stock_date.substr(0, 11) + getWeekDay(this_date);
+
+    $('#form_date').val(date_file_name);
     $.post("php/StoreData.php", $('#hidden_form form').serialize(), function(result){
         console.log(result);
     });
@@ -249,9 +258,9 @@ Date.prototype.Format = function(fmt)
 }
 
 // 获取当日周几
-function getWeekDay() {
+function getWeekDay(thisDate) {
   var weekDays = new Array("周日", "周一", "周二", "周三", "周四", "周五", "周六");
-  return weekDays[new Date().getDay()];
+  return weekDays[thisDate.getDay()];
 }
 
 /*
